@@ -1,4 +1,4 @@
-package FileOcean.Windows;
+package GaiaNet.Windows;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -19,7 +19,7 @@ public class WindowsMain extends Application {
         Parent root = FXMLLoader.load(getClass().getResource("Copy.fxml"));
 
         primaryStage.setScene(new Scene(root));
-        primaryStage.setTitle("FileOcean");
+        primaryStage.setTitle("GaiaNet");
         primaryStage.show();
 
     }

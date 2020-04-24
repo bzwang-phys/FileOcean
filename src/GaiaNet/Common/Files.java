@@ -1,8 +1,7 @@
-package FileOcean.Common;
+package GaiaNet.Common;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.RandomAccess;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -54,8 +53,16 @@ public class Files {
             this.end = end;
         }
     }
+    public static class ProgressInfo{
+        long index;
+        long sum;
+        public ProgressInfo(long index, long sum) {
+            this.index = index;
+            this.sum = sum;
+        }
+    }
 
-    public static void copy(String sourceFile, String targetFile) throws IOException, InterruptedException {
+    public static void copy(String sourceFile, String targetFile, ProgressInfo progressInfo) throws Exception {
         long start = 0;
         long end = 0;
         FileSegment fsg = new FileSegment(sourceFile, FileSegment.Flag.LOCAL);

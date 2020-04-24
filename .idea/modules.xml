@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/FileOcean.iml" filepath="$PROJECT_DIR$/FileOcean.iml" />
+      <module fileurl="file://$PROJECT_DIR$/GaiaNet.iml" filepath="$PROJECT_DIR$/GaiaNet.iml" />
     </modules>
   </component>
 </project>

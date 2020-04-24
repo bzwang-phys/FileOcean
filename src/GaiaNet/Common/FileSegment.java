@@ -1,4 +1,4 @@
-package FileOcean.Common;
+package GaiaNet.Common;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -59,12 +59,11 @@ public class FileSegment {
         this.fileName = fn;
         this.flag = flag;
         this.threadNum = 20;
+        this.size = getFileSizeLocal(fn);
 
         if (flag == Flag.NET){
-            this.size = getFileSizeNet(fn);
             segmentNet();
         }else if (flag == Flag.LOCAL){
-            this.size = getFileSizeLocal(fn);
             segmentLocal();
         }
     }
@@ -114,13 +113,13 @@ public class FileSegment {
             blockSize = NET_BLOCK;
         }else if (size <= NET_BLOCK*30){       //120M
             blockSize = NET_BLOCK*2;
-            blockNum = (long) Math.ceil(1.0*size/NET_BLOCK);
+            blockNum = (long) Math.ceil(1.0*size/blockSize);
         }else if (size <= NET_BLOCK*200){       //800M
             blockSize = NET_BLOCK*5;
-            blockNum = (long) Math.ceil(1.0*size/NET_BLOCK);
+            blockNum = (long) Math.ceil(1.0*size/blockSize);
         }else {       //>800M
             blockSize = NET_BLOCK*8;
-            blockNum = (long) Math.ceil(1.0*size/NET_BLOCK);
+            blockNum = (long) Math.ceil(1.0*size/blockSize);
         }
     }
 
