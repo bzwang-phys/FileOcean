@@ -54,8 +54,8 @@ public class Files {
         }
     }
     public static class ProgressInfo{
-        long index;
-        long sum;
+        public long index;
+        public long sum;
         public ProgressInfo(long index, long sum) {
             this.index = index;
             this.sum = sum;
@@ -66,11 +66,10 @@ public class Files {
         long start = 0;
         long end = 0;
         FileSegment fsg = new FileSegment(sourceFile, FileSegment.Flag.LOCAL);
-        fsg.setThreadNum(20);
         System.out.printf("size=%6.2fM, threadNum=%d, blockNum=%d, blockSize=%6.2fM\n", 1.0*fsg.getSize()/1024/1024,
                 fsg.getThreadNum(),fsg.getBlockNum(),1.0*fsg.getBlockSize()/1024/1024);
         new RandomAccessFile(targetFile, "rw").setLength(fsg.getSize());
-        ArrayList<CopyInfo> copyInfos = new ArrayList<>((int) fsg.getBlockNum());
+        ArrayList<CopyInfo> copyInfos = new ArrayList<>();
         for (int iThread = 0; iThread < fsg.getThreadNum(); iThread++) {
             start = iThread * fsg.getBlockSize();
             end = (iThread+1) * fsg.getBlockSize();
@@ -92,6 +91,8 @@ public class Files {
             for (CopyInfo c : copyInfos) {
                 start += c.start - c.startPoint;
             }
+            progressInfo.index = start;
+            progressInfo.sum = fsg.getSize();
             progress = (int) Math.floor(100.0*start/fsg.getSize());
             System.out.println("progress: " + progress + "%");
             Thread.sleep(1000);
@@ -111,12 +112,6 @@ public class Files {
             long blockSize = 2L*1024*1024;
             byte[] data = new byte[(int)blockSize];
             while(true){
-
-                try {
-                    Thread.sleep(2000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
 
                 if (copyInfo.start+blockSize >= copyInfo.end){
                     blockSize = copyInfo.end - copyInfo.start;

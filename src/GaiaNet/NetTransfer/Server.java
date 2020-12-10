@@ -108,5 +108,12 @@ public class Server {
 
     }
 
+    public void stop() {
+        try {
+            sSocket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
 }

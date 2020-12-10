@@ -1,9 +1,11 @@
 package GaiaNet.NetTransfer;
 
 import GaiaNet.Common.FileSegment;
+import GaiaNet.Common.Files;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -15,7 +17,7 @@ public class Client {
     private String ip;
     private int port;
     private Socket clientSock;
-    private ExecutorService threadPool = Executors.newFixedThreadPool(20);
+    private ExecutorService threadPool = Executors.newFixedThreadPool(40);
     private Hashtable<Integer, ReadWriteLock>  rwLocks = new Hashtable<>();
 
     public String getIp() {
@@ -47,7 +49,8 @@ public class Client {
         long size;
         long start;
         long end;
-        long index;
+        long index;  // for resuming from breakpoint.
+        long progress;  // for collecting the information of progress.
         public NetTransferInfo(String filePath,String fileName,long size,long start,long end,long index) {
             this.filePath = filePath;
             this.fileName = fileName;
@@ -55,10 +58,11 @@ public class Client {
             this.start = start;
             this.end = end;
             this.index = index;
+            this.progress = start;
         }
     }
 
-    public void sendFile(String filePath){
+    public void sendFile(String filePath, FileSegment fs, Files.ProgressInfo pi){
         try {
             File file = new File(filePath);
             if (!file.exists()){
@@ -66,8 +70,7 @@ public class Client {
             }
             rwLocks.put(filePath.hashCode(), new ReentrantReadWriteLock());
             String fileName = file.getName();
-            FileSegment fsg = new FileSegment(filePath, FileSegment.Flag.NET);
-            //fsg.setThreadNum(1);
+            FileSegment fsg = fs;
             DataOutputStream dosSocket = new DataOutputStream(clientSock.getOutputStream());
             dosSocket.writeInt(0);   // Message of file
             dosSocket.flush();
@@ -76,23 +79,42 @@ public class Client {
             dosSocket.writeLong(fsg.getSize());
             dosSocket.flush();
             System.out.printf("blockNum: %d, blockSize: %d",fsg.getBlockNum(),fsg.getBlockSize());
+            ArrayList<NetTransferInfo> ntis = new ArrayList<>((int) fsg.getBlockNum());
+            // this list is used to collect all netTransferInfo, and the progrss.
             for (int blockIndex = 0; blockIndex < fsg.getBlockNum(); blockIndex++) {
                 NetTransferInfo netTransferInfo = new NetTransferInfo(filePath,fileName,
                         fsg.getSize(),
                         blockIndex * fsg.getBlockSize(),
                         (blockIndex + 1) * fsg.getBlockSize(),
                         0);
+                ntis.add(netTransferInfo);
                 threadPool.execute(() -> runSend(netTransferInfo));
             }
-        } catch (IOException e) {
+
+            while (true){
+                Long start = 0L;
+                for (NetTransferInfo nti : ntis) {
+                    start += nti.progress - nti.start;
+                }
+                pi.index = start;
+                pi.sum = fsg.getSize();
+                Integer progress = (int) Math.floor(100.0*start/fsg.getSize());
+                System.out.println("progress: " + progress + "%");
+                Thread.sleep(1000);
+                if (progress >= 100){
+                    break;
+                }
+            }
+        } catch (Exception e) {
             e.printStackTrace();
         }
+
     }
 
     private void runSend(NetTransferInfo netTransferInfo) {
         long start = netTransferInfo.start;
         if (start > netTransferInfo.size-1){    // 0 <= start <= size-1
-            // Solve the problem that blockNum/threadNum may be large than ...
+            // Solve the probyoutubelem that blockNum/threadNum may be large than ...
             return;
         }
         if (netTransferInfo.end > netTransferInfo.size){ // 1 <= end <= size
@@ -116,6 +138,7 @@ public class Client {
             long blockSize = 500L * 1024;   //500Kb
             byte[] data = new byte[(int) blockSize];
             while (true) {
+                netTransferInfo.progress = start;
                 if (start + blockSize >= netTransferInfo.end) {
                     blockSize = netTransferInfo.end - start;
                 }

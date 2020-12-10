@@ -24,8 +24,10 @@ public class FileSegment {
     public long getBlockNum() {
         return blockNum;
     }
-    public void setBlockNum(int blockNum) {
+    public void setBlockNum(long blockNum) {
         this.blockNum = blockNum;
+        threadNum = blockNum;
+        blockSize = (long) Math.ceil(1.0*size/blockNum);
     }
     public Flag getFlag() {
         return flag;
