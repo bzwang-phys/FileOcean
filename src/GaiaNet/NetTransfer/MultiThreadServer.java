@@ -1,5 +1,7 @@
 package GaiaNet.NetTransfer;
 
+import GaiaNet.Common.ByteTools;
+
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -8,7 +10,7 @@ import java.util.Hashtable;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-public class Server {
+public class MultiThreadServer {
     private int port;
     private String basePath;
     ServerSocket sSocket;
@@ -21,7 +23,7 @@ public class Server {
         this.basePath = basePath;
     }
 
-    public Server(int port) {
+    public MultiThreadServer(int port) {
         this.port = port;
         try {
             sSocket = new ServerSocket(port);
@@ -31,6 +33,7 @@ public class Server {
         }
     }
 
+//
     public void serverRun(){
         int flag;
         while (true){
@@ -38,16 +41,17 @@ public class Server {
                 Socket socket = sSocket.accept();
                 DataInputStream dis = new DataInputStream(socket.getInputStream());
                 flag = dis.readInt();
-                switch (flag){
-                    case 0:         // Message of file
-                        newFile(socket, dis);
-                        break;
-                    case 1:         // send file with child thread
-                        new Thread(() -> threadRun(socket, dis)).start();
-                        break;
-                    default:
-                        System.out.println("Unknown Socket.");
+                if (flag ==0){
 
+                } else if (flag==1){  // file transfer
+                    FileHeader fileHeader = new FileHeader();
+                    fileHeader.receive(dis);
+                    if (fileHeader.type == 0)  createFile(socket,dis,fileHeader);
+                    if (fileHeader.type == 1)  new Thread(()-> threadRcvFile(socket,dis,fileHeader)).start();
+                } else if (flag==100){
+                    printStream(socket, dis);
+                } else {
+                    System.out.println("Unknown Socket.");
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -55,21 +59,22 @@ public class Server {
         }
     }
 
-    private void threadRun(Socket socket, DataInputStream dis) {
+//  used to receive files. first read the [name,star,end], then write in file.
+    private void threadRcvFile(Socket socket, DataInputStream dis, FileHeader fileHeader) {
         int len;
         try {
-            String fileName = dis.readUTF();
+            String fileName = fileHeader.name;
             Path filePath = Path.of(basePath, fileName);
             File file = filePath.toFile();
             if (!file.exists()){
                 throw new IOException("File is not created!!");
             }
 
-            long start = dis.readLong();
-            long end = dis.readLong();
-            long index = dis.readLong();
-            System.out.println("thread: "+Thread.currentThread().getName()+", fileName: "+fileName);
-            System.out.printf("start: %d, end: %d, index: %d\n", start,end,index);
+            long start = fileHeader.start;
+            long end = fileHeader.end;
+            long index = fileHeader.index;
+            System.out.printf("thread: "+Thread.currentThread().getName()+" is ready to receive: "+fileName);
+            System.out.printf(", start: %d, end: %d \n", start,end);
             RandomAccessFile rw = new RandomAccessFile(file, "rw");
             byte[] byt = new byte[500 * 1024];
             while ((len = dis.read(byt,0, 500 * 1024))!=-1){
@@ -77,7 +82,7 @@ public class Server {
                 rw.seek(start+index);
                 rw.write(byt,0, len);
                 index += len;
-                System.out.println(Thread.currentThread().getName()+" "+index+" "+end);
+                System.out.printf("receiving: "+Thread.currentThread().getName()+", start: %d, end: %d, index: %d\n", start,end,index);
                 rwLocks.get(file.toString().hashCode()).writeLock().unlock();
             };
             rw.close();
@@ -87,14 +92,13 @@ public class Server {
         }
     }
 
-    private void newFile(Socket socket, DataInputStream dis){
+//  used to write the
+    private void createFile(Socket socket, DataInputStream dis, FileHeader fileHeader){
         String fileName;
         try {
-            fileName = dis.readUTF();
-            long size = dis.readLong();
+            fileName = fileHeader.name;
+            long size = fileHeader.size;
             File f = Path.of(basePath, fileName).toFile();
-            System.out.println(fileName);
-            System.out.println(size);
             if ( f.exists() && (f.length()==size) ){
                 //  read configuration
             }else {
@@ -102,6 +106,7 @@ public class Server {
                 rw.setLength(size);
             }
             rwLocks.put(f.toString().hashCode(), new ReentrantReadWriteLock());
+            System.out.println(Thread.currentThread().getName()+", New file: " +fileName+", size: "+size);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -114,6 +119,18 @@ public class Server {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    // Just print out the stream
+    public void printStream(Socket socket, DataInputStream dis){
+        try {
+            byte[] byt = new byte[10];
+            dis.read(byt);
+            System.out.print(ByteTools.HexString(byt));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
 }

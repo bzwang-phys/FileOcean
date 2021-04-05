@@ -60,6 +60,10 @@ public class Files {
             this.index = index;
             this.sum = sum;
         }
+        public ProgressInfo() {
+            this.index = 0;
+            this.sum = 0;
+        }
     }
 
     public static void copy(String sourceFile, String targetFile, ProgressInfo progressInfo) throws Exception {

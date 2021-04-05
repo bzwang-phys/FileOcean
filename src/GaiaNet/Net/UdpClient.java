@@ -1,0 +1,37 @@
+package GaiaNet.Net;
+
+import java.io.IOException;
+import java.io.InterruptedIOException;
+import java.net.*;
+import java.nio.charset.StandardCharsets;
+import java.util.Scanner;
+
+public class UdpClient {
+    private static final int TIMEOUT = 5000;
+    private static final int MAXNUM = 5;
+    private int port;
+    private String ip;
+
+    public UdpClient(String ip, int port){
+        this.ip = ip;
+        this.port = port;
+    }
+
+    public void run() throws IOException {
+        Scanner sc = new Scanner(System.in);
+//        while (true){
+
+//            System.out.println("Message: >> ");
+//            String strSend = sc.nextLine();
+            String strSend = InetAddress.getLocalHost().getHostAddress();
+            DatagramSocket ds = new DatagramSocket();
+            InetAddress serverIp = InetAddress.getByName(this.ip);
+            DatagramPacket dpSent = new DatagramPacket(strSend.getBytes(StandardCharsets.UTF_8),strSend.length(),serverIp,this.port);
+//        byte[]  buf = new byte[1024];
+//        DatagramPacket dpReceive = new DatagramPacket(buf, 1024);
+            ds.send(dpSent);
+
+//        }
+
+    }
+}
