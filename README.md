@@ -13,3 +13,6 @@ run:
 
 create jar file:
     jar cvfe xxx.jar GaiaNet.Main GaiaNet
+
+run jar file:
+    java -jar XXX.jar

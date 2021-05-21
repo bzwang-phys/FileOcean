@@ -4,7 +4,7 @@ import java.util.Scanner;
 
 //import GaiaNet.NetTransfer.*;
 
-public class NetTransfer {
+public class DaemonServer {
     private String ip;
     private int port;
     private int portServer = 9190;
@@ -14,7 +14,7 @@ public class NetTransfer {
      * Prepare a server listening on poerServer,
      * And produce a commandline tool.
      */
-    public NetTransfer(){
+    public DaemonServer(){
         this.server = new MultiThreadServer(portServer);
         new Thread(() -> this.server.serverRun()).start(); ;
         CommandLine();
@@ -28,7 +28,7 @@ public class NetTransfer {
             while (true) {
                 System.out.print("GaiaNet :> ");
                 cmdstr = sc.nextLine();
-                cmd.handle(cmdstr);
+                cmd.sendCmd(cmdstr);
             }
         } catch (Exception e){
 

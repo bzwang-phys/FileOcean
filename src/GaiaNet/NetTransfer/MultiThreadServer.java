@@ -121,7 +121,7 @@ public class MultiThreadServer {
         }
     }
 
-    // Just print out the stream
+    // Just print out the stream with hex string
     public void printStream(Socket socket, DataInputStream dis){
         try {
             byte[] byt = new byte[10];
