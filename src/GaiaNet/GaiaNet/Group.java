@@ -1,6 +1,5 @@
-package GaiaNet.Gaia;
+package GaiaNet.GaiaNet;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.TreeMap;
 

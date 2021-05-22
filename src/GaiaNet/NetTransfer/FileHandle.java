@@ -1,4 +1,4 @@
 package GaiaNet.NetTransfer;
 
-public class FileHandler {
+public class FileHandle {
 }

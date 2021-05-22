@@ -9,12 +9,17 @@ import java.nio.file.Path;
 import java.util.Hashtable;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 public class MultiThreadServer {
+    private static final Logger logServer = Logger.getLogger( MultiThreadServer.class.getName() );
+    public FileHandler fileHandler;  // For log file.
     private int port;
     private String basePath;
     ServerSocket sSocket;
-    Hashtable<Integer, ReadWriteLock>  rwLocks = new Hashtable<>();;
+    Hashtable<Integer, ReadWriteLock>  rwLocks = new Hashtable<>();
 
     public String getBasePath() {
         return basePath;
@@ -28,6 +33,9 @@ public class MultiThreadServer {
         try {
             sSocket = new ServerSocket(port);
             basePath = System.getProperty("user.dir");
+            fileHandler = new FileHandler("./MultiThreadServer.log");   // For log file.
+            fileHandler.setFormatter(new SimpleFormatter());
+            logServer.addHandler(fileHandler);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -41,21 +49,26 @@ public class MultiThreadServer {
                 Socket socket = sSocket.accept();
                 DataInputStream dis = new DataInputStream(socket.getInputStream());
                 flag = dis.readInt();
-                if (flag ==0){
+                GaiaType type = GaiaType.values()[flag];
 
-                } else if (flag==1){  // file transfer
+                if (type == GaiaType.Command){
+                    CommandHandler cmdHandler = new CommandHandler();
+                    new Thread(()-> cmdHandler.handle(socket, logServer)).start();
+                } else if (type == GaiaType.File){  // file transfer
                     FileHeader fileHeader = new FileHeader();
                     fileHeader.receive(dis);
+                    logServer.info("File from: "+socket.getRemoteSocketAddress()+ " File Name: "+fileHeader.name+" Type: "+fileHeader.type);
                     if (fileHeader.type == 0)  createFile(socket,dis,fileHeader);
                     if (fileHeader.type == 1)  new Thread(()-> threadRcvFile(socket,dis,fileHeader)).start();
                 } else if (flag==100){
                     printStream(socket, dis);
                 } else {
-                    System.out.println("Unknown Socket.");
+                    System.out.println("MultiThreadServer: Unknown Socket.");
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             }
+
         }
     }
 

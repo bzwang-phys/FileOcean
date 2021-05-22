@@ -6,13 +6,14 @@ import java.util.HashMap;
 public class Command {
     public String to;
     public String action;
+    public String cmdStr;
     public ArrayList<String> argList = new ArrayList<>();
     public HashMap<String, String> shortOption = new HashMap<>();
     public HashMap<String, String> longOption = new HashMap<>();
 
 
     public Command(){
-        this.to = "";
+        this.to = "127.0.0.1";
         this.action = "";
     }
 

@@ -1,4 +1,4 @@
-package GaiaNet.Net;
+package GaiaNet.BasicNet;
 
 public class Multicast {
 }

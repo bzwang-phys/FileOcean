@@ -12,7 +12,7 @@ run:
     java GaiaNet.Main
 
 create jar file:
-    jar cvfe xxx.jar GaiaNet.Main GaiaNet
+    jar cvfe  GaiaNet.jar GaiaNet.Main GaiaNet
 
 run jar file:
-    java -jar XXX.jar
+    java -jar GaiaNet.jar

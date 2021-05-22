@@ -1,4 +1,4 @@
-package GaiaNet.Net;
+package GaiaNet.BasicNet;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
