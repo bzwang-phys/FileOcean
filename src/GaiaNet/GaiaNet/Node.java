@@ -30,6 +30,28 @@ public class Node {
 
     // Three methods to build node.
     // 1.local  2.from txt info. 3. null
+    public Node(String s, Config conf){
+        if ("local".equalsIgnoreCase(s)) {
+            try {
+                this.nodeName = conf.nodeName;
+                this.getIPAndHost();
+                this.getMacArray();
+                this.osName = getOsName();
+                this.uid = getUid();
+                this.gid = getGid();
+
+                fileHandler = new FileHandler("./log/GaiaNet.log");   // For log file.
+                fileHandler.setFormatter(new SimpleFormatter());
+                logNode.addHandler(fileHandler);
+                logNode.info("Initialize Node: \n" + this.getInfo());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            buildFromTxt(s);
+        }
+    }
+
     public Node(String s){
         if ("local".equalsIgnoreCase(s)) {
             try {
@@ -39,7 +61,7 @@ public class Node {
                 this.uid = getUid();
                 this.gid = getGid();
 
-                fileHandler = new FileHandler("./GaiaNet.log");   // For log file.
+                fileHandler = new FileHandler("./log/GaiaNet.log");   // For log file.
                 fileHandler.setFormatter(new SimpleFormatter());
                 logNode.addHandler(fileHandler);
                 logNode.info("Initialize Node: \n" + this.getInfo());
@@ -53,15 +75,17 @@ public class Node {
 
     public Node(){}
 
+    public void Config(){ }
+
     private void getMacArray(){
         try {
-            StringBuilder sb = new StringBuilder();
             ArrayList<String> tmpMacList = new ArrayList<>();
             java.util.Enumeration<NetworkInterface> netInterfaceEnum = NetworkInterface.getNetworkInterfaces();
             while (netInterfaceEnum.hasMoreElements()){
                 NetworkInterface netIface = netInterfaceEnum.nextElement();
                 byte[] mac = netIface.getHardwareAddress();
                 if (mac == null) continue;
+                StringBuilder sb = new StringBuilder();
                 for (int i = 0; i < mac.length; i++) {
                     sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));
                 }

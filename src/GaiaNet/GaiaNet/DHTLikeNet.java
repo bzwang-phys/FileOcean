@@ -37,6 +37,8 @@ public class DHTLikeNet {
         return 0; // normal
     }
 
+    public void Config(){ }
+
     public void handle(Socket socket){
         try {
             DataOutputStream dos = new DataOutputStream(socket.getOutputStream());

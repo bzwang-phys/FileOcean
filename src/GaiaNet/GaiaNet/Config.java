@@ -1,43 +1,27 @@
 package GaiaNet.GaiaNet;
 
-import java.io.*;
+import java.util.List;
+import java.util.Map;
 
 public class Config {
-    public String configFile;
     public String nodeName;
+    public String masterNodeIp;
+    public List<String> neighbours;
 
-    public Config(String s){
-        try {
-            this.configFile = s;
-            readConfig();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
+    @Override
+    public String toString() {
+        return "Config{" +
+            "nodeName='" + nodeName + '\'' +
+            ", masterNodeIp='" + masterNodeIp + '\'' +
+            ", neighbours='" + neighbours + '\'' +
+            '}';
     }
 
-    public Config(){
-        try {
-            this.configFile = "NodeConfig.txt";
-            readConfig();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public String readConfig() throws IOException {
-        File file = new File(this.configFile);
-        InputStreamReader isr = new InputStreamReader(new FileInputStream(file));
-        BufferedReader bufReader = new BufferedReader(isr);
-        String line;
-        while ((line=bufReader.readLine()) != null){
-            parse(line);
-        }
-        return "";
-    }
-
-    public void parse(String line){
-        line.split()
-        if ()
-
-    }
+//    private String neighboursSting(){
+//        String s = "";
+//        for (Map.Entry<String, String> entry : this.neighbours.entrySet())
+//            s += entry.getKey() + ":" + entry.getValue() + ", ";
+//        return s;
+//    }
 }

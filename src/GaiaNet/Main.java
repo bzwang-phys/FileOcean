@@ -7,7 +7,7 @@ import GaiaNet.NetTransfer.*;
 public class Main {
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        String type = "test";
+        String type = "server";
         if (args.length != 0)
             type = args[0];
         DaemonServer nt = new DaemonServer(type);

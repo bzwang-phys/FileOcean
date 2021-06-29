@@ -33,7 +33,7 @@ public class MultiThreadServer {
         try {
             sSocket = new ServerSocket(port);
             basePath = System.getProperty("user.dir");
-            fileHandler = new FileHandler("./MultiThreadServer.log");   // For log file.
+            fileHandler = new FileHandler("./log/MultiThreadServer.log");   // For log file.
             fileHandler.setFormatter(new SimpleFormatter());
             logServer.addHandler(fileHandler);
         } catch (IOException e) {

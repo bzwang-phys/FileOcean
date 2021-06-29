@@ -12,14 +12,15 @@ public class DaemonServer {
     private Net net = null;
 
     /*
-     * Prepare a server listening on poerServer,
+     * Prepare a server listening on portServer,
      *
      */
     public DaemonServer(String type){
         if ("server".equals(type)){
+            this.net = new Net();
+            System.exit(1);
             this.server = new MultiThreadServer(portServer);
             this.udpServer = new UdpServer(portServer);
-            this.net = new Net();
             new Thread(() -> this.udpServer.run()).start();
             this.server.serverRun();
         } else if ("shell".equals(type)){
